@@ -1,0 +1,1043 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UAB Histologi 2020 - Latihan Soal Interaktif</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --success-color: #2ecc71;
+            --fail-color: #e74c3c;
+            --bg-color: #f4f6f8;
+            --card-bg: #ffffff;
+            --text-color: #2c3e50;
+            --border-color: #dcdde1;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 850px;
+            background: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+            padding: 30px;
+            position: relative;
+        }
+
+        header {
+            text-align: center;
+            padding-bottom: 20px;
+            border-bottom: 2px solid var(--border-color);
+            margin-bottom: 25px;
+        }
+
+        header h1 {
+            font-size: 24px;
+            color: var(--primary-color);
+        }
+
+        header p {
+            font-size: 14px;
+            color: #7f8c8d;
+            margin-top: 5px;
+        }
+
+        .progress-bar-container {
+            background: #e2e8f0;
+            border-radius: 10px;
+            height: 8px;
+            overflow: hidden;
+            margin-bottom: 25px;
+        }
+
+        .progress-bar {
+            background: var(--secondary-color);
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .question-card {
+            display: none;
+        }
+
+        .question-card.active {
+            display: block;
+        }
+
+        .question-header {
+            font-size: 15px;
+            font-weight: bold;
+            color: var(--secondary-color);
+            margin-bottom: 10px;
+            text-transform: uppercase;
+        }
+
+        .question-text {
+            font-size: 17px;
+            font-weight: 600;
+            line-height: 1.6;
+            margin-bottom: 20px;
+            color: #1a252f;
+        }
+
+        .options-container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 25px;
+        }
+
+        .option-item {
+            display: flex;
+            align-items: center;
+            background: #f8fafc;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            padding: 14px 18px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .option-item:hover {
+            background: #f1f5f9;
+            border-color: #cbd5e1;
+        }
+
+        .option-item.selected {
+            border-color: var(--secondary-color);
+            background: #e0f2fe;
+        }
+
+        .option-item input[type="radio"] {
+            margin-right: 15px;
+            transform: scale(1.2);
+            accent-color: var(--secondary-color);
+            cursor: pointer;
+        }
+
+        .option-text {
+            font-size: 15px;
+            font-weight: 500;
+        }
+
+        /* Feedback Styles setelah koreksi ditekan */
+        .option-item.correct-ans {
+            background: #dcfce7 !important;
+            border-color: var(--success-color) !important;
+            color: #14532d;
+        }
+
+        .option-item.wrong-ans {
+            background: #fee2e2 !important;
+            border-color: var(--fail-color) !important;
+            color: #7f1d1d;
+        }
+
+        .explanation-box {
+            display: none;
+            margin-top: -15px;
+            margin-bottom: 25px;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .explanation-box.show {
+            display: block;
+        }
+
+        .explanation-box.correct {
+            background: #e8f8f5;
+            color: var(--success-color);
+            border-left: 4px solid var(--success-color);
+        }
+
+        .explanation-box.wrong {
+            background: #fdedec;
+            color: var(--fail-color);
+            border-left: 4px solid var(--fail-color);
+        }
+
+        .nav-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 2px solid var(--border-color);
+        }
+
+        button {
+            padding: 12px 24px;
+            font-size: 15px;
+            font-weight: 600;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-prev {
+            background: #94a3b8;
+            color: white;
+        }
+
+        .btn-prev:hover:not(:disabled) {
+            background: #64748b;
+        }
+
+        .btn-check {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .btn-check:hover:not(:disabled) {
+            background: #1e293b;
+        }
+
+        .btn-next {
+            background: var(--secondary-color);
+            color: white;
+        }
+
+        .btn-next:hover:not(:disabled) {
+            background: #2563eb;
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Layar Hasil Akhir */
+        .results-screen {
+            display: none;
+            text-align: center;
+            padding: 30px 0;
+        }
+
+        .score-circle {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            background: #f0fdf4;
+            border: 5px solid var(--success-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 36px;
+            font-weight: bold;
+            color: var(--primary-color);
+            margin: 25px auto;
+        }
+
+        .summary-table {
+            width: 100%;
+            margin: 25px 0;
+            border-collapse: collapse;
+            font-size: 15px;
+        }
+
+        .summary-table th, .summary-table td {
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            text-align: center;
+        }
+
+        .summary-table th {
+            background: #f8fafc;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header id="quiz-header">
+        <h1>Simulasi UAB Histologi 2020</h1>
+        <p>Pilihan Ganda - Klik "Cek Jawaban" untuk mengoreksi setiap nomor</p>
+    </header>
+
+    <div class="progress-bar-container" id="progress-container">
+        <div class="progress-bar" id="progress-bar"></div>
+    </div>
+
+    <div id="quiz-wrapper">
+        </div>
+
+    <div class="results-screen" id="results-wrapper">
+        <h2>Simulasi Selesai!</h2>
+        <p style="color: #64748b; margin-top: 5px;">Berikut adalah rangkuman performa ujian Anda:</p>
+        <div class="score-circle" id="final-score">0</div>
+        <table class="summary-table">
+            <thead>
+                <tr>
+                    <th>Total Soal</th>
+                    <th>Benar</th>
+                    <th>Salah</th>
+                    <th>Akurasi (%)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td id="res-total">50</td>
+                    <td id="res-correct" style="color: var(--success-color); font-weight: bold;">0</td>
+                    <td id="res-wrong" style="color: var(--fail-color); font-weight: bold;">0</td>
+                    <td id="res-accuracy">0%</td>
+                </tr>
+            </tbody>
+        </table>
+        <button class="btn-next" onclick="restartQuiz()">Kerjakan Ulang Soal</button>
+    </div>
+
+    <div class="nav-controls" id="controls-wrapper">
+        <button class="btn-prev" id="btn-prev" onclick="navigateQuestion(-1)" disabled>Previous</button>
+        <button class="btn-check" id="btn-check" onclick="checkCurrentAnswer()">Cek Jawaban</button>
+        <button class="btn-next" id="btn-next" onclick="navigateQuestion(1)">Next</button>
+    </div>
+</div>
+
+<script>
+    // Database Soal Murni Berdasarkan Berkas Kompilasi UAB Histologi 2020
+    const rawQuestions = [
+        {
+            q: "Mengenai alveolus yang benar adalah",
+            options: [
+                "Di ikuti cabang arteri bronkialis berakhir di br. respiratorius",
+                "Sel aveoli tipe 1 kubis",
+                "Sel alveoli tipe 2 pipih",
+                "Berdampingan dengan kapiler paru sumbernya dari cabang a. pulmonalis",
+                "Mengandung sel clara bronchiolus"
+            ],
+            correct: "Berdampingan dengan kapiler paru sumbernya dari cabang a. pulmonalis"
+        },
+        {
+            q: "Sifat bronkus intrapulmonalis adalah",
+            options: [
+                "Tidak mengandung tulang rawan",
+                "Epitel berlapis kubis",
+                "Mengandung sel clara",
+                "Tulang rawan hyaline tidak continuous",
+                "Di ikuti cabang vena pulmonalis"
+            ],
+            correct: "Tulang rawan hyaline tidak continuous"
+        },
+        {
+            q: "Struktur dibawah ini terdapat di dalam tunika submukosa :<br>1.Pleksus dari Heller<br>2.Pleksus dari Meissner<br>3.Oesophageal gland proper<br>4.Pyloric gland mucosa",
+            options: [
+                "4 saja benar",
+                "2 dan 4 benar",
+                "Semua benar",
+                "1, 2 dan 3 benar",
+                "1 dan 3 benar"
+            ],
+            correct: "1, 2 dan 3 benar"
+        },
+        {
+            q: "Ciri septum nasi",
+            options: [
+                "Mukosa hanya olfaktoria saja hanya di bagian atas",
+                "Pada mukosa olfaktoria terdapat sel goblet",
+                "Mengandung tulang rawan elastis",
+                "Pada mukosa respiratory terdapat fila olfaktoria",
+                "Pada mukosa respiratoria terdapat sinus venosus"
+            ],
+            correct: "Pada mukosa respiratoria terdapat sinus venosus"
+        },
+        {
+            q: "Sel sekitar glomerulus yang berfungsi saat tubuh kekurangan darah adalah",
+            options: [
+                "Sel parietal glomerulus",
+                "Juxta-glomerular cell renin aktif saat tekanan darah turun",
+                "Macula densa",
+                "Mesangial sel",
+                "Lacis"
+            ],
+            correct: "Juxta-glomerular cell renin aktif saat tekanan darah turun"
+        },
+        {
+            q: "Struktur atau bentukan di bawah ini yang merupakan jaringan limfoid kendor adalah",
+            options: [
+                "Medullary cord pada kelenjar getah bening",
+                "Folikel sekunder pada kelenjar getah bening",
+                "Nodulus lymphaticus pada payer’ patches",
+                "Sinus sub capsularis pada kelenjar getah bening",
+                "Folikel primer pada kelenjar getah bening"
+            ],
+            correct: "Sinus sub capsularis pada kelenjar getah bening"
+        },
+        {
+            q: "Perjalanan sperma sampai ke proses ejakulasi melalui",
+            options: [
+                "Tubulus rectus----tubulus seminiferus contortus----rete testis--- vas eferens----epididimis-----vas deferens------ampula vas deferens",
+                "Tubulus seminiferus kontortus----tubulus rectus-----vas deferens----rete testis--- vas eferens----epididimis-----ampula vas deferens",
+                "Tubulus seminiferus contortus----tubulus rectus----rete testis--- vas eferens -----vas deferens------ampula vas deferens----- epididimis",
+                "Tubulus seminiferus contortus----tubulus seminiferus rectus----rete testis--- vas eferens----epididimis-----vas deferens------ampula vas deferens",
+                "Tubulus seminiferus contortus----tubulus rectus----rete testis--- vas eferens----epididimis-----ampula vas deferens----- vas deferens"
+            ],
+            correct: "Tubulus seminiferus contortus----tubulus seminiferus rectus----rete testis--- vas eferens----epididimis-----vas deferens------ampula vas deferens"
+        },
+        {
+            q: "Mengenai kelenjar suprarenal pernyataan yang sesuai",
+            options: [
+                "Sel spongiosit penyusun utama zona retikularis fasciculata",
+                "Medulla nya menghasilkan hormone steroid",
+                "Zona glomerulosa berdekatan dengan capsul kelenjar",
+                "Bagian korteks memproduksi hormone adrenalin",
+                "Lapisan korteks dari luar adalah retikularis. Fasciculate, glomerulosa"
+            ],
+            correct: "Zona glomerulosa berdekatan dengan capsul kelenjar"
+        },
+        {
+            q: "Yang benar mengenai T.C.I adalah<br>1. Terdapat di cortex ginjal<br>2. Sitoplasma bersifat basofilik<br>3. Jumlah inti lebih sedikit<br>4. Tidak mempunyai brush-border",
+            options: [
+                "2 dan 4 benar",
+                "4 saja benar",
+                "Semua benar",
+                "1, 2 dan 3 benar",
+                "1 dan 3 benar"
+            ],
+            correct: "1 dan 3 benar"
+        },
+        {
+            q: "Struktur berikut berisi aquous humor<br>1. COA<br>2. Spatia anguli iridis fontana<br>3. COP<br>4. Corpus vitreus vitreous humor",
+            options: [
+                "1 dan 3 benar",
+                "1, 2 dan 3 benar",
+                "4 saja benar",
+                "2 dan 4 benar",
+                "Semua benar"
+            ],
+            correct: "1, 2 dan 3 benar"
+        },
+        {
+            q: "Seorang pasien didiagnosis mengalami thalasemia (kelainan darah yang mengakibatkan pecahnya eritrosit), saat pemeriksaan fisik didapatkan pembesaran organ limfatik yang berfungsi sebagai destruksi eritosit.<br>Organ limfatik apakah itu",
+            options: [
+                "Tonsila palatina",
+                "Lien",
+                "Tonsila lingualis",
+                "Tonsila pharyngica",
+                "Timus"
+            ],
+            correct: "Lien"
+        },
+        {
+            q: "Mengenai palatum yang benar",
+            options: [
+                "Lapisan propria nya mengandung kelenjar",
+                "Epitel nya dibentuk dari epitel berlapis silindris",
+                "Palatum molle adalah bagian yang keras",
+                "Palatum durum tidak mengandung jaringan tulang",
+                "Membentuk dasar rongga mulut"
+            ],
+            correct: "Lapisan propria nya mengandung kelenjar"
+        },
+        {
+            q: "Berikut benar mengenai gigi adalah",
+            options: [
+                "Enamel akan terus dibentuk seumur hidup",
+                "Dentin dibentuk oleh sel ameloblast",
+                "Free gingiva tidak mengandung papil propia pada lapisan epitelnya",
+                "Cervical loop merupakan pertemuan outer dan inner enamel epithelium",
+                "Enamel berasal dari outer enamel epithelium"
+            ],
+            correct: "Cervical loop merupakan pertemuan outer dan inner enamel epithelium"
+        },
+        {
+            q: "Tentang pancreas yang benar adalah",
+            options: [
+                "Tidak mengandung sel centroasinus",
+                "Merupakan kelenjar endokrin murni",
+                "Ductus interlobularisnya hanya intercalated saja",
+                "Penyusun kelenjarnya adalah serous mucou",
+                "Merupakan kelenjar eksokrin murni"
+            ],
+            correct: "Merupakan kelenjar eksokrin murni"
+        },
+        {
+            q: "Tentang kelenjar liur yang benar",
+            options: [
+                "Terdapat sel centroacinus pada bagian kelenjarnya",
+                "Pada kelenjar weber di jumpai demillune of gianuzzi",
+                "Epitel penyusun saluran keluarnya berderet atau berlapis silindri",
+                "Ductus interlobularisnya tidak mengandung striated duct",
+                "Kelenjar parotis adalah mucous murni"
+            ],
+            correct: "Epitel penyusun saluran keluarnya berderet atau berlapis silindri"
+        },
+        {
+            q: "Sel yang menghasilkan testosterone adalah",
+            options: [
+                "Tubulus seminiferous",
+                "Sel sperma",
+                "Sel leydig",
+                "Sel Sertoli pematangan spermatozoa",
+                "Fibrobla"
+            ],
+            correct: "Sel leydig"
+        },
+        {
+            q: "Struktur berikut yang dapat ditemukan pada lapisan dalam mata, adalah:<br>1. Koroid<br>2. Makula lutea<br>3. Korpus siliaris<br>4. Ora serata",
+            options: [
+                "1 dan 3 benar",
+                "Semua benar",
+                "1, 2 dan 3 benar",
+                "4 saja benar",
+                "2 dan 4 benar"
+            ],
+            correct: "2 dan 4 benar"
+        },
+        {
+            q: "Pernyataan tentang appendix Vermiformis di bawah ini adalah BENAR :<br>1. mempunyai kripta dari Lieberkuhn<br>2. mempunyai lymphonoduli agregasi.<br>3. pada orang dewasa, lumen sering terisi oleh jaringan ikat<br>4. tunika muskularis eksterna-nya tipis",
+            options: [
+                "1 dan 3 benar",
+                "1, 2 dan 3 benar",
+                "2 dan 4 benar",
+                "Semua benar",
+                "4 saja benar"
+            ],
+            correct: "1, 2 dan 3 benar"
+        },
+        {
+            q: "Mengenai karakteristik endometrium fase menstruasi",
+            options: [
+                "Kelenjarnya belum berkelok kelok proliferasi",
+                "Terdapat kelenjar yang berbentuk tubuler lurus prolif.",
+                "Kelenjarnya meluruh",
+                "Dinding endometrium menipis",
+                "Terdapat epitel berlapis silindris pada kelenjarnya sekresi"
+            ],
+            correct: "Kelenjarnya meluruh"
+        },
+        {
+            q: "Berikut terdapat pada folikel de graft….<br>1. Vacuola call exner<br>2. Sel granulosa<br>3. Sel lutein<br>4. Sel theca",
+            options: [
+                "2,4 benar",
+                "4 benar",
+                "1,2,3,4 salah semua atau benar semua",
+                "1,3 benar",
+                "1,2,3 benar"
+            ],
+            correct: "1,2,3,4 salah semua atau benar semua"
+        },
+        {
+            q: "Yang termasuk penyusun plasenta pars foetalis adalah….<br>1. Chorion plate<br>2. Intervillus space<br>3. Anchoring villus<br>4. Septum plasenta",
+            options: [
+                "4 benar",
+                "2.4 benar",
+                "1.2.3.4 salah semua atau benar semua",
+                "1,2.3 benar",
+                "1.3 benar"
+            ],
+            correct: "1,2.3 benar"
+        },
+        {
+            q: "Sel yang terdapat pada krista ampularis adalah:<br>1. Sel rambut<br>2. Sel tiang<br>3. Sel penyangga<br>4. Sel hensens",
+            options: [
+                "Semua benar",
+                "2 dan 4 benar",
+                "1 dan 3 benar",
+                "1, 2 dan 3 benar",
+                "4 saja benar"
+            ],
+            correct: "1 dan 3 benar"
+        },
+        {
+            q: "Berikut ciri – ciri folikel penyusun ovarium",
+            options: [
+                "Folikel primordial dilapisi sel theca selpais pipih",
+                "Di dalam folikel sekunder terdapat cumulus oophorus",
+                "Call exner bodies terdapat pada folikel primer",
+                "Lapisan theca interna berbatasan dengan athrum folikel",
+                "Corpus luteum mengandung dua macam sel utama"
+            ],
+            correct: "Corpus luteum mengandung dua macam sel utama"
+        },
+        {
+            q: "Mengenai karakteristik endometrium fase sekresi yang benar adalah",
+            options: [
+                "Dinding endometrium menipis",
+                "Kelenjarnya meluruh",
+                "Terdapat kelenjar yang berbentuk tubuler lurus",
+                "Terdapat epitel selapis silindris pada kelenjarnya",
+                "Kelenjarnya belum berkelok kelok"
+            ],
+            correct: "Terdapat epitel selapis silindris pada kelenjarnya"
+        },
+        {
+            q: "Mengenai kelenjar thyroid berikut yang benar",
+            options: [
+                "Merupakan penghasil hormone thyroid saja",
+                "Sel parafolikular memproduksi hormone calcitonin",
+                "Vakuola resorbsi terdapat pada perbatasan sel folikular dengan kapiler",
+                "Pada fase tidak aktif banyak vacuola resorbsi",
+                "Fase aktif epitel koloidnya selapis pipih"
+            ],
+            correct: "Sel parafolikular memproduksi hormone calcitonin"
+        },
+        {
+            q: "Lapisan berikut pada kornea yang memiliki daya regenerasi yang besar adalah",
+            options: [
+                "Endotel kornea",
+                "Membrane bowman",
+                "Membrane desemet",
+                "Stroma kornea",
+                "Epitel kornea"
+            ],
+            correct: "Epitel kornea"
+        },
+        {
+            q: "Mengenai villi chorealis yang tepat",
+            options: [
+                "Stem villus melekat pada septum plasenta",
+                "Jaringan ikat embrional ikut membentuk barrier plasenta",
+                "Anchoring villus melekat pada chorion plate",
+                "Syncytial knot dibentuk dari sel sitotrofoblast",
+                "Lapisan terluar dari villus adalah sitotrofoblast"
+            ],
+            correct: "Jaringan ikat embrional ikut membentuk barrier plasenta"
+        },
+        {
+            q: "Benar mengenai sel pada tubulus seminiferus..<br>1. Spermatogonium punya n kromosom<br>2. Spermatosit primer punya n kromosom<br>3. Spermatosit sekunder punya 2n kromosom<br>4. Spermatozoa merupakan transformasi spermatid",
+            options: [
+                "2 dan 4 benar",
+                "1 dan 3 benar",
+                "4 saja benar",
+                "1, 2 dan 3 benar",
+                "Semua benar"
+            ],
+            correct: "4 saja benar"
+        },
+        {
+            q: "Struktur yang terdapat pada segitiga Kiernan….<br>1. Canal herring<br>2. Saluran limfe<br>3. Celah mall<br>4. Ductus interlobulari",
+            options: [
+                "1,3 benar",
+                "1,2,3 benar",
+                "1,2,3,4 salah semua atau benar semua",
+                "4 benar",
+                "2,4 benar"
+            ],
+            correct: "1,2,3,4 salah semua atau benar semua"
+        },
+        {
+            q: "Manakah yang benar tentang urinary pole",
+            options: [
+                "Tempat keluarnya eferen arteriole",
+                "Awal Tubulus Contortus Proksimalis",
+                "Terdiri dari epitel selapis pipih",
+                "Terdapat di medullary rays",
+                "Terdapat pada medulla ginjal"
+            ],
+            correct: "Awal Tubulus Contortus Proksimalis"
+        },
+        {
+            q: "Sel sel penyusun kelenjar parathyroid….<br>1. Chief cell<br>2. Sel parietal<br>3. Sel oxyphil<br>4. Mucous neck cell",
+            options: [
+                "2,4 benar",
+                "1,2,3,4 salah semua atau benar semua",
+                "1,3 benar",
+                "1,2,3 benar",
+                "4 benar"
+            ],
+            correct: "1,3 benar"
+        },
+        {
+            q: "Kelenjar yang terdapat dalam lapisan lamina propria, KECUALI",
+            options: [
+                "Cardiac gland",
+                "Kripta liberkuhn",
+                "Oesophageal cardiac gland",
+                "Brunner gland",
+                "Fundic gland"
+            ],
+            correct: "Brunner gland"
+        },
+        {
+            q: "Karakteristik larynk adalah sebagai berikut",
+            options: [
+                "Banyak kelenjar pada plica vestibularis",
+                "Plica vestibularis dilapisi epitel berlapis pipih",
+                "Terdapat ligament pada plika vestibularis",
+                "Plica vocalis di lapisi epitel berdert silindris",
+                "Terdapat otot lurik pada plika vestibularis"
+            ],
+            correct: "Banyak kelenjar pada plica vestibularis"
+        },
+        {
+            q: "Tentang papil lidah yang benar",
+            options: [
+                "Papilla fungiformis tidak mengandung taste buds",
+                "Papilla circumvalata terdapat di dorsal dari sulcus terminalis",
+                "Terdapat pada sisi dorsal dari lidah",
+                "Terdapat taste buds pada papilla filiformis",
+                "Papilla foliate terdapat diantara dua papilla filliformi"
+            ],
+            correct: "Terdapat pada sisi dorsal dari lidah"
+        },
+        {
+            q: "Ciri epiglottis",
+            options: [
+                "Epitel pada sisi laryng berlapis silindris",
+                "Sisi oral banyak kelenjar",
+                "Sisi oral epitel mengandung papil propia",
+                "Tulang rawan hyaline",
+                "Pada sisi oral banyak taste buds"
+            ],
+            correct: "Sisi oral epitel mengandung papil propia"
+        },
+        {
+            q: "Seorang pasien mengalami pembesaran kelenjar getah bening (KGB) akibat infeksi yang didapatkannya. Secara histologi bentukan apa yang membesar pada KGB",
+            options: [
+                "Sinus medullary",
+                "Primary nodule",
+                "Trabecula",
+                "Medullary cord",
+                "Germinal center"
+            ],
+            correct: "Germinal center"
+        },
+        {
+            q: "Yang BENAR tentang sel Paneth :<br>1. terdapat pada mukosa usus halus<br>2. terdapat pada mukosa appendix vermiformis<br>3. mengandung bacteriocidal.<br>4. mempunyai granula eosinophylic di dasar sel",
+            options: [
+                "1, 2 dan 3 benar",
+                "Semua benar",
+                "4 saja benar",
+                "2 dan 4 benar",
+                "1 dan 3 benar"
+            ],
+            correct: "Semua benar"
+        },
+        {
+            q: "Sel sekitar glomerulus yang berfungsi untuk meningkatkan tekanan darah adalah",
+            options: [
+                "Lacis",
+                "Macula densa",
+                "Juxta-glomerular cell",
+                "Mesangial sel",
+                "Sel parietal glomerulus"
+            ],
+            correct: "Juxta-glomerular cell"
+        },
+        {
+            q: "Berikut adalah temasuk saluran empedu….<br>1. Canalikuli billiaris<br>2. Ductus interlobularis<br>3. Ductus cysticus<br>4. Celah disse lympha",
+            options: [
+                "4 benar",
+                "1,2,3 benar",
+                "1,2,3,4 salah semua atau benar semua",
+                "2,4 benar",
+                "1,3 benar"
+            ],
+            correct: "1,2,3 benar"
+        },
+        {
+            q: "Sel berikut pada gaster yang berfungsi mengeluarkan HCL adalah",
+            options: [
+                "Mukous cap cell",
+                "Parietal cell",
+                "Mukous neck cell",
+                "Chief cell pepsinogen",
+                "Argentafin cell enteroendokrin"
+            ],
+            correct: "Parietal cell"
+        },
+        {
+            q: "Struktur yang terdapat pada telinga bagian luar adalah:<br>1. Membrana tympani<br>2. Kelenjar serominous<br>3. Tulang rawan elastis<br>4. Kelenjar sebacea",
+            options: [
+                "Semua benar",
+                "1 dan 3 benar",
+                "4 saja benar",
+                "2 dan 4 benar",
+                "1, 2 dan 3 benar"
+            ],
+            correct: "Semua benar"
+        },
+        {
+            q: "Yang BUKAN termasuk organ limfatik adalah",
+            options: [
+                "Tonsil lingualis",
+                "Limpa",
+                "Limfonode",
+                "Tiroid",
+                "Payer patch"
+            ],
+            correct: "Tiroid"
+        },
+        {
+            q: "Seorang bayi neonatus mengalami pembesaran abdomen disertai ketidakmampuan untuk mengeluarkan feses.<br>Struktur apakah yang terganggu sehingga tunika muskularis eksterna yang berisi otot polos tidak mampu berkontraksi (peristaltic)",
+            options: [
+                "Pleksus Simpatis",
+                "Pleksus Meissner",
+                "Pleksus Parasimpati",
+                "Pleksus Heller",
+                "Pleksus Auerbach"
+            ],
+            correct: "Pleksus Auerbach"
+        },
+        {
+            q: "Mengenai hipofisis pernyataan yang benar",
+            options: [
+                "Badan herring terdapat pada adenohipofisis",
+                "Pars intermedia mengandung koloid",
+                "Terdapat brain sand pada neurohipofisis pineal body",
+                "Sel pituisit merupakan penyusun pars distalis",
+                "Pars distalis adalah neurohipofisis"
+            ],
+            correct: "Pars intermedia mengandung koloid"
+        },
+        {
+            q: "Pernyataan mengenai lidah yang tepat adalah",
+            options: [
+                "Terdapat kelenjar weber yang bersifat mucus murni",
+                "Permukaan dorsal nya halus",
+                "Mengandung otot polos yang saling tegak lurus 3 macam",
+                "Bersifat invollunter gerakannya",
+                "Permukaan ventral nya kasar karena adanya papil lidah"
+            ],
+            correct: "Mengandung otot polos yang saling tegak lurus 3 macam"
+        },
+        {
+            q: "Reseptor keseimbangan statis terdapat pada",
+            options: [
+                "Ampula canalis semicircularis",
+                "Membrana tympani",
+                "Ductus cochlearis suara",
+                "Vestibulum",
+                "Utriculus"
+            ],
+            correct: "Utriculus"
+        },
+        {
+            q: "Pernyetatn yang benar tentang skala media adalah",
+            options: [
+                "Bagian atasnya dibatasi oleh membrana basilaris",
+                "Terdapat crista ampularis",
+                "Berisi perilimf",
+                "Berhubungan dengan scala tympani melalui helicotrema",
+                "Terdapat organon spiralis corti"
+            ],
+            correct: "Terdapat organon spiralis corti"
+        },
+        {
+            q: "Yang termasuk bagian prostat...<br>1. Zona transitional<br>2. Zona central<br>3. Zona peripheral<br>4. Zona marginalis",
+            options: [
+                "1 dan 3 benar",
+                "Semua benar",
+                "1, 2 dan 3 benar",
+                "2 dan 4 benar",
+                "4 saja benar"
+            ],
+            correct: "1, 2 dan 3 benar"
+        },
+        {
+            q: "Arteri centralis dapat kita temukan pada :<br>1. Cortex kelenjar getah bening<br>2. Medulla kelenjar getah bening<br>3. Pulpa merah limpa<br>4. Pulpa putih limpa",
+            options: [
+                "1, 2 dan 3 benar",
+                "4 saja benar",
+                "Semua benar",
+                "1 dan 3 benar",
+                "2 dan 4 benar"
+            ],
+            correct: "4 saja benar"
+        },
+        {
+            q: "Pernyataan berikut benar tentang iris, adalah",
+            options: [
+                "Berfungsi untuk mempertahankan bentuk bola mata",
+                "Tersusun oleh 5 lapisan",
+                "Bagian paling anterior dari lapisan vaskuler",
+                "Mensekresi humor aquos proc. ciliaris",
+                "Transparan dan tidak berwarna"
+            ],
+            correct: "Bagian paling anterior dari lapisan vaskuler"
+        }
+    ];
+
+    // Mengacak susunan pilihan jawaban (shuffling) tanpa merusak nilai kunci
+    function shuffleArray(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+        return array;
+    }
+
+    // Bangun struktur data komparasi final
+    const questions = rawQuestions.map((item, index) => {
+        const shuffledOptions = shuffleArray([...item.options]);
+        return {
+            id: index + 1,
+            q: item.q,
+            options: shuffledOptions,
+            correct: item.correct,
+            userSelection: null,
+            isCorrect: null,
+            checked: false
+        };
+    });
+
+    let currentIdx = 0;
+
+    // Render komponen ke antarmuka DOM
+    const wrapper = document.getElementById('quiz-wrapper');
+    questions.forEach((item, qIdx) => {
+        const card = document.createElement('div');
+        card.className = `question-card ${qIdx === 0 ? 'active' : ''}`;
+        card.id = `qcard-${qIdx}`;
+
+        let optionsHTML = '';
+        item.options.forEach((opt, oIdx) => {
+            optionsHTML += `
+                <div class="option-item" id="opt-container-${qIdx}-${oIdx}" onclick="selectOption(${qIdx}, ${oIdx}, '${opt.replace(/'/g, "\\'")}')">
+                    <input type="radio" name="q-opt-${qIdx}" id="radio-${qIdx}-${oIdx}" value="${opt}">
+                    <span class="option-text"><b>${String.fromCharCode(65 + oIdx)}.</b> ${opt}</span>
+                </div>
+            `;
+        });
+
+        card.innerHTML = `
+            <div class="question-header">Soal Nomor ${item.id} dari 50</div>
+            <div class="question-text">${item.q}</div>
+            <div class="options-container">${optionsHTML}</div>
+            <div class="explanation-box" id="explain-${qIdx}"></div>
+        `;
+        wrapper.appendChild(card);
+    });
+
+    function updateProgressBar() {
+        const pct = ((currentIdx + 1) / questions.length) * 100;
+        document.getElementById('progress-bar').style.width = `${pct}%`;
+    }
+
+    function selectOption(qIdx, oIdx, textValue) {
+        if (questions[qIdx].checked) return; // Kunci input jika sudah dicek
+
+        questions[qIdx].userSelection = textValue;
+
+        // Reset highlight elemen pilihan lain dalam satu nomor
+        const siblings = document.querySelectorAll(`#qcard-${qIdx} .option-item`);
+        siblings.forEach(el => el.classList.remove('selected'));
+
+        // Aktifkan tanda visual item terpilih
+        document.getElementById(`opt-container-${qIdx}-${oIdx}`).classList.add('selected');
+        document.getElementById(`radio-${qIdx}-${oIdx}`).checked = true;
+    }
+
+    function checkCurrentAnswer() {
+        const currentData = questions[currentIdx];
+        if (currentData.checked) return;
+
+        if (!currentData.userSelection) {
+            alert("Silakan pilih salah satu jawaban terlebih dahulu sebelum menekan tombol Cek Jawaban.");
+            return;
+        }
+
+        currentData.checked = true;
+        const isCorrect = (currentData.userSelection === currentData.correct);
+        currentData.isCorrect = isCorrect;
+
+        // Beri warna klasifikasi indikator jawaban (Benar / Salah) pada DOM
+        currentData.options.forEach((opt, oIdx) => {
+            const optEl = document.getElementById(`opt-container-${currentIdx}-${oIdx}`);
+            optEl.classList.remove('selected');
+            
+            if (opt === currentData.correct) {
+                optEl.classList.add('correct-ans');
+            } else if (opt === currentData.userSelection && !isCorrect) {
+                optEl.classList.add('wrong-ans');
+            }
+        });
+
+        // Tampilkan kotak status penjelasan singkat di bawah pilihan
+        const expBox = document.getElementById(`explain-${currentIdx}`);
+        if (isCorrect) {
+            expBox.className = "explanation-box show correct";
+            expBox.innerHTML = `✓ <b>Jawaban Anda Benar!</b><br>Kunci: ${currentData.correct}`;
+        } else {
+            expBox.className = "explanation-box show wrong";
+            expBox.innerHTML = `✗ <b>Jawaban Anda Kurang Tepat.</b><br>Kunci yang benar adalah: <b>${currentData.correct}</b>`;
+        }
+
+        document.getElementById('btn-check').disabled = true;
+    }
+
+    function navigateQuestion(step) {
+        document.getElementById(`qcard-${currentIdx}`).classList.remove('active');
+        currentIdx += step;
+
+        if (currentIdx >= questions.length) {
+            evaluateFinalScore();
+            return;
+        }
+
+        document.getElementById(`qcard-${currentIdx}`).classList.add('active');
+        
+        // Atur status keterbentukan tombol kontrol navigasi
+        document.getElementById('btn-prev').disabled = (currentIdx === 0);
+        
+        const checkBtn = document.getElementById('btn-check');
+        if (questions[currentIdx].checked) {
+            checkBtn.disabled = true;
+        } else {
+            checkBtn.disabled = false;
+        }
+
+        if (currentIdx === questions.length - 1) {
+            document.getElementById('btn-next').innerText = "Finish";
+        } else {
+            document.getElementById('btn-next').innerText = "Next";
+        }
+
+        updateProgressBar();
+    }
+
+    function evaluateFinalScore() {
+        document.getElementById('quiz-wrapper').style.display = 'none';
+        document.getElementById('controls-wrapper').style.display = 'none';
+        document.getElementById('progress-container').style.display = 'none';
+        document.getElementById('quiz-header').style.display = 'none';
+
+        let correctCount = 0;
+        let wrongCount = 0;
+
+        questions.forEach(item => {
+            if (item.isCorrect) correctCount++;
+            else wrongCount++;
+        });
+
+        const accuracy = Math.round((correctCount / questions.length) * 100);
+
+        document.getElementById('results-wrapper').style.display = 'block';
+        document.getElementById('final-score').innerText = `${accuracy}`;
+        document.getElementById('res-correct').innerText = correctCount;
+        document.getElementById('res-wrong').innerText = wrongCount;
+        document.getElementById('res-accuracy').innerText = `${accuracy}%`;
+    }
+
+    function restartQuiz() {
+        location.reload();
+    }
+
+    // Inisialisasi awal progress bar saat aplikasi pertama kali dimuat
+    updateProgressBar();
+</script>
+
+</body>
+</html>
